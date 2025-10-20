@@ -48,14 +48,14 @@ export default function Home() {
       </div>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center justify-center mx-auto flex mb-16">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center justify-center mx-auto flex max-md:mb-10 max-md:mt-4 md:mb-16">
             <h1 className="typing  text-5xl  md:text-6xl font-bold bg-gradient-to-tl from-orange-600 to-blue-700  bg-clip-text text-transparent mb-6">
               MediaFlow MK
             </h1>
           </div>
 
-          <div className="space-y-8 py-12">
+          <div className="space-y-8 md:py-12">
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
               <div className="max-md:p-2 md:p-4">
                 <MediaManager

@@ -99,7 +99,7 @@ interface InfiniteQueryData {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-// HOOKS PERSONALIZADOS (mantidos iguais)
+// HOOKS PERSONALIZADOS
 const useRootFolders = () => {
   return useQuery<FolderWithCount[]>({
     queryKey: ["folders", "root"],
@@ -601,7 +601,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             <div className="flex gap-2">
               <button
                 onClick={() => setIsUploadModalOpen(true)}
-                className="flex cursor-pointer rounded-full items-center space-x-2 px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105 group"
+                className="flex cursor-pointer rounded-2xl md:rounded-full items-center space-x-2 px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105 group"
               >
                 <Upload className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">Upload</span>
@@ -610,7 +610,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
               <button
                 onClick={handleAddFolder}
                 disabled={createFolderMutation.isPending || isCreatingFolder}
-                className="flex items-center cursor-pointer rounded-full space-x-2 px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 disabled:opacity-50 hover:scale-105"
+                className="flex items-center cursor-pointer rounded-md md:rounded-full space-x-2 px-2  md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 disabled:opacity-50 hover:scale-105"
               >
                 {createFolderMutation.isPending || isCreatingFolder ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -627,7 +627,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
               {breadcrumbs.length > 0 && (
                 <button
                   onClick={navigateUp}
-                  className="flex items-center cursor-pointer space-x-2 px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105"
+                  className="flex items-center cursor-pointer space-x-2 max-md:px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white md:rounded-full rounded-md hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105"
                 >
                   <MdDriveFileMoveRtl className="w-5 h-5" />
                   <span className="font-medium">Voltar</span>
@@ -687,18 +687,18 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-white/80 border cursor-pointer outline-none border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+              className="bg-white/80 border cursor-pointer outline-none  border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
             >
               <option value="name">Ordenar por Nome</option>
               <option value="date">Ordenar por Data</option>
               <option value="size">Ordenar por Tamanho</option>
             </select>
 
-            <div className="flex bg-white/80 border border-gray-300 rounded-xl p-1 px-4 backdrop-blur-sm">
+            <div className="flex gap-2 bg-white/80 border border-gray-300 rounded-xl p-1 px-2 backdrop-blur-sm">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-lg cursor-pointer transition-all duration-300 ${
@@ -844,7 +844,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   );
 }
 
-// 🔥 MODAL DE UPLOAD MELHORADO
+// MODAL DE UPLOAD MELHORADO
 const UploadModal: React.FC<UploadModalProps> = ({
   isOpen,
   onClose,
@@ -896,7 +896,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
   );
 };
 
-// 🔥 COMPONENTE FOLDER ITEM MELHORADO
+// COMPONENTE FOLDER ITEM
 const FolderItem: React.FC<FolderItemProps> = ({
   folder,
   selectedItem,
@@ -907,11 +907,11 @@ const FolderItem: React.FC<FolderItemProps> = ({
   isPending,
 }) => (
   <div
-    className={`group relative bg-gradient-to-br from-white to-gray-50/80 border-2 border-gray-200/80 rounded-2xl hover:shadow-xl hover:border-blue-400/60 transition-all duration-300 backdrop-blur-sm ${
-      selectedItem === folder.id ? "ring-4 ring-blue-500 scale-105" : ""
+    className={`group relative bg-gradient-to-br from-white to-gray-50/80 border-3 border-gray-200/80 rounded-2xl shadow-xl hover:border-blue-400/60 transition-all duration-300 backdrop-blur-sm ${
+      selectedItem === folder.id ? "ring-4 ring-blue-600 " : ""
     } ${
       viewMode === "grid"
-        ? "p-5 hover:-translate-y-1"
+        ? "p-5 hover:-translate-y-0.5"
         : "p-4 flex items-center space-x-4 hover:bg-gray-50/50"
     } ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
   >
@@ -920,13 +920,13 @@ const FolderItem: React.FC<FolderItemProps> = ({
         viewMode === "list" ? "flex space-x-1" : ""
       }`}
     >
-      <div className="flex space-x-1 bg-white/95 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-200/50">
+      <div className="flex space-x-2 bg-white/95 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-200/50">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onEdit();
           }}
-          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 hover:scale-110"
+          className="p-2 cursor-pointer text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 hover:scale-110"
           title="Renomear"
           disabled={isPending}
         >
@@ -937,7 +937,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
             e.stopPropagation();
             onDelete();
           }}
-          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 hover:scale-110"
+          className="p-2 text-red-600 cursor-pointer hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 hover:scale-110"
           title="Deletar"
           disabled={isPending}
         >
@@ -980,7 +980,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           className={`
           font-semibold text-gray-900 group-hover:text-blue-700 transition-colors
           ${viewMode === "grid" ? "text-sm mb-2 px-1" : "text-base"} 
-          ${isPending ? "text-gray-500" : ""}
+          ${isPending ? "text-gray-800" : ""}
           break-words line-clamp-2
         `}
           title={folder.name}
@@ -992,7 +992,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           className={`
           text-gray-600 text-xs
           ${viewMode === "grid" ? "inline-block px-2 py-1" : ""} 
-          bg-gray-100/70 rounded-full px-2 py-1
+          
         `}
         >
           {folder._count?.children || 0} subpastas • {folder._count?.files || 0}{" "}
@@ -1003,7 +1003,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
   </div>
 );
 
-// 🔥 COMPONENTE FILE ITEM MELHORADO
+// COMPONENTE FILE
 const FileItem: React.FC<FileItemProps> = ({
   file,
   selectedItem,
@@ -1015,7 +1015,7 @@ const FileItem: React.FC<FileItemProps> = ({
 }) => (
   <div
     className={`group relative bg-gradient-to-br from-white to-gray-50/80 border-2 border-gray-200/80 rounded-2xl hover:shadow-xl hover:border-blue-400/60 transition-all duration-300 backdrop-blur-sm ${
-      selectedItem === file.id ? "ring-4 ring-blue-500 scale-105" : ""
+      selectedItem === file.id ? "ring-4 ring-blue-600 scale-105" : ""
     } ${
       viewMode === "grid"
         ? "p-4 hover:-translate-y-1"
