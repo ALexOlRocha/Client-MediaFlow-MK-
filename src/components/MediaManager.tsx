@@ -577,9 +577,13 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative z-10">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm shadow-lg">
-              <LuFolderOpen className="w-6 h-6 text-white" />
-            </div>
+            <Image
+              src={"/MediaFlow2.png"}
+              alt="logo"
+              width={100}
+              height={100}
+              className="w-12 h-12 rounded-full"
+            />
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                 Gerenciador de Mídia
@@ -642,7 +646,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             <span className="font-medium">Início</span>
           </button>
 
-          {breadcrumbs.map((folder: Folder, index: number) => (
+          {breadcrumbs.map((folder: Folder) => (
             <div key={folder.id} className="flex items-center">
               <span className="mx-2 text-white/50">/</span>
               <button
@@ -687,7 +691,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-white/80 border cursor-pointer outline-none border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+              className="bg-white/80 border cursor-pointer outline-none border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
             >
               <option value="name">Ordenar por Nome</option>
               <option value="date">Ordenar por Data</option>
