@@ -50,13 +50,11 @@ export default function Home() {
           </svg>
         </div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-purple-100/20"></div>
-
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
           <div className="absolute -top-40 -right-32 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
-
         <div className="relative z-10">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center justify-center mx-auto flex max-md:mb-10 max-md:mt-4 md:mb-16">
@@ -65,7 +63,7 @@ export default function Home() {
               </h1>
             </div>
 
-            <div className="space-y-8 md:py-12">
+            <div className="space-y-8 md:py-14">
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
                 <div className="max-md:p-2 md:p-4">
                   <MediaManager
@@ -90,7 +88,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
         <div className="absolute bottom-0 left-0 w-full">
           <svg
             className="w-full h-auto"
