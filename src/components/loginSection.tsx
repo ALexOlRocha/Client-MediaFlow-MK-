@@ -161,7 +161,6 @@ function AuthSection() {
 
   const handleSocialLogin = (platform: string) => {
     setError(`Login com ${platform} - Em desenvolvimento`);
-    // Aqui você integraria com APIs de social login
   };
 
   const handleDemoLogin = () => {
@@ -183,12 +182,12 @@ function AuthSection() {
               <Image
                 src="/MediaFlow2.png"
                 alt="MediaFlow logo"
-                width={80}
-                height={80}
-                className="w-20 h-20 rounded-full border-2 border-blue-100"
+                width={100}
+                height={100}
+                className="w-25 h-25 rounded-full border-2 border-blue-100"
               />
             </div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-black bg-gradient-to-r from-black to-black bg-clip-text text-transparent mb-4">
               {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
             </h1>
             <p className="text-gray-600 text-lg font-medium">
@@ -371,72 +370,51 @@ function AuthSection() {
                     confirmPassword: "",
                   });
                 }}
-                className="text-blue-600 hover:text-blue-500 font-semibold transition-colors"
+                className="text-blue-600 cursor-pointer hover:text-blue-500 font-semibold transition-colors"
               >
                 {isLogin ? "Cadastre-se" : "Fazer login"}
               </button>
             </p>
           </div>
-
-          {isLogin && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-700 text-center">
-                <strong>Conta de demonstração:</strong>
-                <br />
-                Email: demo@mediaflow.com
-                <br />
-                Senha: demo123
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-8 lg:p-16 bg-gradient-to-br from-blue-600 via-[#0a3057] to-orange-600 max-md:rounded-t-[120px] lg:rounded-l-[500px] relative overflow-hidden">
-        {/* Background Effects */}
+      <div className="flex items-center justify-center max-md:px-6 max-md:py-18 lg:p-16 bg-gradient-to-br from-blue-600 via-[#0a3057] to-orange-600 max-md:rounded-t-[120px] lg:rounded-l-[500px] relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48 "></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-400/10 rounded-full translate-y-40 -translate-x-40 "></div>
 
-        {/* Grid Pattern Overlay */}
+        {/* Grids */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
-        <div className="text-center text-white max-w-4xl relative z-10">
-          {/* Main Header */}
-          <div className="mb-10">
-            <div className="inline-block mb-4">
-              <div className="text-5xl  font-black bg-gradient-to-r from-white via-orange-200 to-orange-400 bg-clip-text text-transparent leading-none">
-                MediaFlow
+        <div className="text-center text-white max-w-4xl mx-auto relative z-10">
+          <div>
+            <div className="inline-block mb-2">
+              <div className="text-4xl  font-black bg-gradient-to-r backdrop-blur-2xl from-white via-gray-200 to-gray-400 bg-clip-text text-transparent leading-none">
+                MediaFlow MK
               </div>
             </div>
 
-            <h2 className="text-xl lg:text-2xl font-bold text-orange-300 mb-8 leading-tight tracking-wide">
+            <h2 className="text-xl lg:text-2xl font-bold text-orange-300 mb-5 leading-tight tracking-wide">
               <span className="bg-gradient-to-r from-orange-300 to-orange-400 bg-clip-text text-transparent">
                 Seu Gerenciador de Mídia Inteligente
               </span>
             </h2>
 
-            <p className="text-xl lg:text-2xl text-blue-100 leading-relaxed max-w-2xl mx-auto font-light">
+            <p className="text-xl lg:text-2xl text-blue-100 leading max-w-2xl mx-auto font-light">
               Transforme completamente a maneira como você gerencia arquivos de
-              mídia com uma plataforma
-              <span className="font-semibold text-orange-300">
-                {" "}
-                intuitiva, poderosa e descomplicada
-              </span>
-              .
+              mídia com uma plataforma intuitiva, poderosa e descomplicada.
             </p>
           </div>
 
-          <div className="justify-center">
-            <div className="justify-center items-center mb-10 w-65 h-auto flex text-center">
-              <Lottie />
-            </div>
+          <div className="justify-center mb-4">
+            <Lottie />
           </div>
-          {/* CTA Button */}
+
           <div className="relative">
             <Button
               color="white"
-              className="relative px-12 py-4 text-lg font-bold rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 hover:bg-white hover:text-orange-600 transition-all duration-300 hover:scale-105 shadow-2xl hover:shadow-3xl group"
+              className="relative px-6 py-4 text-lg font-bold rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 hover:bg-white hover:text-orange-600 transition-all duration-300 hover:scale-105 shadow-2xl hover:shadow-3xl group"
             >
               <span className="flex items-center space-x-3">
                 <span className="text-2xl">✨</span>
