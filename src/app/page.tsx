@@ -18,7 +18,7 @@ export default function Home() {
           <LogoutButton />
         </div>
 
-        {/* Top Wave Background */}
+        {/* Top Background */}
         <div className="absolute top-0 left-0 w-full rotate-180">
           <svg
             className="w-full h-75 md:h-auto"
@@ -70,7 +70,7 @@ export default function Home() {
               </h1>
             </div>
 
-            {/* Media Manager */}
+            {/* MediaFlow MK */}
             <div className="space-y-8 md:py-14">
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
                 <div className="max-md:p-2 md:p-4">
@@ -95,7 +95,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Bottom Wave Background */}
+        {/* Bottom Background */}
         <div className="absolute bottom-0 left-0 w-full">
           <svg
             className="w-full h-auto"

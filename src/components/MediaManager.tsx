@@ -299,7 +299,7 @@ const useDeleteFile = () => {
 };
 
 export default function MediaManager({ onFolderChange }: MediaManagerProps) {
-  const queryClient = useQueryClient(); // ADICIONE ESTA LINHA
+  const queryClient = useQueryClient();
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Folder[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
