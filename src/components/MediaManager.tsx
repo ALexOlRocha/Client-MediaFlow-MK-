@@ -298,7 +298,6 @@ const useDeleteFile = () => {
   });
 };
 
-
 export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Folder[]>([]);
@@ -876,7 +875,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-white/80 hover:text-white bg-white/20 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-110"
+              className="p-2 text-white/80 cursor-pointer hover:text-white bg-white/20 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-110"
             >
               <X className="w-5 h-5" />
             </button>

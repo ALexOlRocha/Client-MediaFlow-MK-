@@ -8,7 +8,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 interface Folder {
   id: string;
   name: string;
-  // Adicione outras propriedades conforme necessário
 }
 
 interface FolderUploadProps {
@@ -160,12 +159,10 @@ export default function FolderUpload({
 
     try {
       const formData = new FormData();
+      const fileList = Array.from(files);
 
       // Verificar tamanho total
-      const totalSize = Array.from(files).reduce(
-        (acc, file) => acc + file.size,
-        0
-      );
+      const totalSize = fileList.reduce((acc, file) => acc + file.size, 0);
       if (totalSize > MAX_TOTAL_SIZE) {
         throw new Error(
           `Arquivos muito grandes. Tamanho total máximo: ${formatFileSize(
@@ -175,7 +172,7 @@ export default function FolderUpload({
       }
 
       // Verificar arquivos individuais
-      for (const file of Array.from(files)) {
+      for (const file of fileList) {
         if (file.size > MAX_FILE_SIZE) {
           throw new Error(
             `Arquivo "${file.name}" muito grande. Máximo: ${formatFileSize(
@@ -186,23 +183,37 @@ export default function FolderUpload({
       }
 
       // Adicionar todos os arquivos
-      Array.from(files).forEach((file) => {
+      fileList.forEach((file) => {
         formData.append("files", file);
+        console.log(
+          "📎 Adicionando arquivo:",
+          file.name,
+          formatFileSize(file.size)
+        );
       });
 
+      // CORREÇÃO: Usar folderId em vez de parentFolderId
       const targetFolderId = parentFolderId || currentFolder?.id;
       if (targetFolderId) {
-        formData.append("parentFolderId", targetFolderId);
+        formData.append("folderId", targetFolderId); // CORRIGIDO
+        console.log("📁 Pasta destino:", targetFolderId);
       }
 
-      formData.append("folderName", `Pasta-${Date.now()}`);
-
       console.log(
-        "📁 Enviando múltiplos arquivos:",
-        files.length,
-        "Tamanho total:",
+        "📤 Enviando múltiplos arquivos:",
+        fileList.length,
+        "arquivos, Total:",
         formatFileSize(totalSize)
       );
+
+      // DEBUG: Mostrar dados do FormData
+      console.log("📦 Conteúdo do FormData:");
+      for (const pair of formData.entries()) {
+        console.log(
+          `  ${pair[0]}:`,
+          pair[1] instanceof File ? `File: ${(pair[1] as File).name}` : pair[1]
+        );
+      }
 
       // Simular progresso
       const progressInterval = setInterval(() => {
@@ -215,33 +226,68 @@ export default function FolderUpload({
         });
       }, 300);
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/folders/upload-structure`,
-        {
+      // CORREÇÃO: Tentar ambas as rotas sequencialmente
+      let response;
+      let usedAltRoute = false;
+
+      // Primeiro tenta a rota principal
+      try {
+        response = await fetch(`${API_BASE_URL}/api/files/upload-multiple`, {
           method: "POST",
           body: formData,
-        }
-      );
+        });
+        console.log("🔄 Usando rota principal: /api/files/upload-multiple");
+      } catch (routeError) {
+        console.warn(
+          "⚠️ Rota principal falhou, tentando alternativa...",
+          routeError
+        );
+
+        // Se a rota principal falhar, tenta a alternativa
+        response = await fetch(
+          `${API_BASE_URL}/api/files/upload-multiple-alt`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        usedAltRoute = true;
+        console.log(
+          "🔄 Usando rota alternativa: /api/files/upload-multiple-alt"
+        );
+      }
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      console.log("📨 Resposta do servidor:", response.status);
+      console.log("📨 Resposta do servidor:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        rota: usedAltRoute ? "alternativa" : "principal",
+      });
 
       if (!response.ok) {
-        let errorMessage = `Upload falhou: ${response.status}`;
+        let errorMessage = `Upload falhou: ${response.status} ${response.statusText}`;
         try {
           const errorData: UploadErrorResponse = await response.json();
           errorMessage = errorData.error || errorMessage;
+          console.error("❌ Erro detalhado:", errorData);
         } catch {
           const text = await response.text();
           errorMessage = text || errorMessage;
+          console.error("❌ Erro texto:", text);
         }
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      console.log("✅ Arquivos processados com sucesso:", result);
+      console.log("✅ Upload múltiplo bem-sucedido:", result);
+
+      // Mostrar estatísticas do upload
+      if (result.failed > 0) {
+        console.warn("⚠️ Alguns arquivos falharam:", result.details?.failed);
+      }
 
       setTimeout(() => {
         onUploadComplete();
@@ -249,7 +295,7 @@ export default function FolderUpload({
         setUploadProgress(0);
       }, 1000);
     } catch (error) {
-      console.error("❌ Erro no upload múltiplo:", error);
+      console.error("❌ Erro completo no upload múltiplo:", error);
       setUploadError(
         error instanceof Error ? error.message : "Erro desconhecido no upload"
       );
@@ -258,6 +304,22 @@ export default function FolderUpload({
       setIsUploading(false);
     }
   };
+
+  // // Função para testar as rotas (debug)
+  // const testRoutes = async () => {
+  //   console.log("🧪 Testando rotas disponíveis...");
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/api/debug/routes`);
+  //     if (response.ok) {
+  //       const routes = await response.json();
+  //       console.log("🛣️ Rotas disponíveis:", routes);
+  //     } else {
+  //       console.warn("⚠️ Rota de debug não disponível");
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ Erro ao testar rotas:", error);
+  //   }
+  // };
 
   const handleCloseError = (): void => {
     setUploadError(null);
@@ -277,7 +339,7 @@ export default function FolderUpload({
         <div className="flex space-x-2 mb-3">
           <button
             onClick={() => handleUploadTypeChange("zip")}
-            className={`px-3 py-1 rounded-full cursor-pointer text-sm ${
+            className={`px-3 py-2 rounded-sm cursor-pointer text-sm ${
               uploadType === "zip"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -287,7 +349,7 @@ export default function FolderUpload({
           </button>
           <button
             onClick={() => handleUploadTypeChange("structure")}
-            className={`px-3 py-1 rounded-full cursor-pointer text-sm ${
+            className={`px-3 py-2 rounded-sm cursor-pointer text-sm ${
               uploadType === "structure"
                 ? "bg-green-600 text-white"
                 : "bg-gray-200 text-gray-700"
@@ -309,6 +371,14 @@ export default function FolderUpload({
           <br />• Arquivos individuais: até <strong>100MB</strong>
           <br />• Total múltiplos: até <strong>1GB</strong>
         </div>
+
+        {/* Botão de debug (opcional)
+        <button
+          onClick={testRoutes}
+          className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 mb-2"
+        >
+          Testar Rotas
+        </button> */}
       </div>
 
       {uploadType === "zip" ? (
@@ -379,7 +449,9 @@ export default function FolderUpload({
         <div className="mt-3 p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
           <div className="font-semibold">✅ Upload concluído com sucesso!</div>
           <div className="text-xs mt-1">
-            A pasta foi importada com toda a estrutura.
+            {uploadType === "zip"
+              ? "A pasta foi importada com toda a estrutura."
+              : "Os arquivos foram uploadados com sucesso."}
           </div>
         </div>
       )}
