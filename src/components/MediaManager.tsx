@@ -299,6 +299,7 @@ const useDeleteFile = () => {
 };
 
 export default function MediaManager({ onFolderChange }: MediaManagerProps) {
+  const queryClient = useQueryClient(); // ADICIONE ESTA LINHA
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Folder[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -308,6 +309,30 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleUploadComplete = useCallback(() => {
+    setIsUploadModalOpen(false);
+
+    console.log("🔄 Invalidando cache do React Query...");
+
+    if (currentFolder?.id) {
+      queryClient.invalidateQueries({
+        queryKey: ["folders", currentFolder.id, "content"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["folders", currentFolder.id, "light"],
+      });
+    } else {
+      queryClient.invalidateQueries({
+        queryKey: ["folders", "root"],
+      });
+    }
+
+    // Invalida também queries gerais
+    queryClient.invalidateQueries({
+      queryKey: ["folders"],
+    });
+  }, [currentFolder?.id, queryClient]);
 
   // CONSULTAS
   const { data: rootFolders, isLoading: loadingRoot } = useRootFolders();
@@ -383,10 +408,6 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
     return filtered;
   }, [folders, files, searchTerm, sortBy]);
-
-  const handleUploadComplete = useCallback(() => {
-    setIsUploadModalOpen(false);
-  }, []);
 
   // NAVEGAÇÃO
   const navigateToFolder = useCallback(
@@ -851,12 +872,12 @@ const UploadModal: React.FC<UploadModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 cursor-not-allowed animate-in fade-in duration-300">
       <div
         className="bg-white rounded-3xl shadow-2xl border border-gray-200/80 w-full max-w-2xl max-h-[80vh] overflow-hidden transform animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 relative">
+        <div className="bg-gradient-to-r from-blue-700 via-[#0a3057] to-orange-500 p-5 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">

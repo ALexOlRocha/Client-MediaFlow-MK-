@@ -96,8 +96,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
 export function LogoutButton() {
   const { logout } = useAuth();
   const router = useRouter();
+  const [texto, setTexto] = useState("Sair");
 
   const handleLogout = () => {
+    setTexto("Saindo...");
     logout();
     router.push("/login");
   };
@@ -108,7 +110,7 @@ export function LogoutButton() {
       onClick={handleLogout}
       className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
     >
-      <span className="font-semibold">Sair</span>
+      <span className="font-semibold">{texto}</span>
       <LuLogOut className="w-4 h-4" />
     </Button>
   );
