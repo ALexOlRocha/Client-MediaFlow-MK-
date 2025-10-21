@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/Button";
+import { LuLogOut } from "react-icons/lu";
 
 // Hook para verificar autenticação
 export function useAuth() {
@@ -71,11 +73,13 @@ export function LogoutButton() {
   };
 
   return (
-    <button
+    <Button
+      color="orange"
       onClick={handleLogout}
-      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+      className="px-6 py-3 bg--600 flex text-white rounded-full items-center gap-2 transition-colors"
     >
-      Sair
-    </button>
+      <span> Sair</span>
+      <LuLogOut className="w-4 h-4 text-white" />
+    </Button>
   );
 }

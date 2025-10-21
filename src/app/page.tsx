@@ -14,12 +14,12 @@ export default function Home() {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
-        <div className="flex justify-end z-20 p-4 absolute top-0 right-0">
+        <div className="flex justify-end z-20 md:p-4  p-2 absolute top-0 right-0">
           <LogoutButton />
         </div>
         <div className="absolute top-0 left-0 w-full rotate-180">
           <svg
-            className="w-full h-auto"
+            className="w-full h-75 md:h-auto"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 1440 320"
             preserveAspectRatio="none"
@@ -60,7 +60,7 @@ export default function Home() {
         <div className="relative z-10">
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center justify-center mx-auto flex max-md:mb-10 max-md:mt-4 md:mb-16">
-              <h1 className="typing  text-5xl  md:text-6xl font-bold bg-gradient-to-tl from-orange-600 to-blue-700  bg-clip-text text-transparent mb-6">
+              <h1 className="typing  text-5xl  max-md:py-5 md:text-6xl font-bold bg-gradient-to-tl from-orange-600 to-blue-700  bg-clip-text text-transparent mb-6">
                 MediaFlow MK
               </h1>
             </div>

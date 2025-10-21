@@ -176,7 +176,6 @@ function AuthSection() {
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 w-full min-h-screen bg-gray-50">
-      {/* Left Side - Form */}
       <div className="flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
@@ -189,17 +188,16 @@ function AuthSection() {
                 className="w-20 h-20 rounded-full border-2 border-blue-100"
               />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {isLogin ? "Bem-vindo de volta" : "Criar Conta"}
+            <h1 className="text-4xl font-black bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent mb-4">
+              {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg font-medium">
               {isLogin
                 ? "Entre na sua conta para acessar o MediaFlow"
-                : "Preencha os dados abaixo para criar sua conta"}
+                : "Comece sua jornada conosco hoje"}
             </p>
           </div>
 
-          {/* Social Login */}
           <div className="flex justify-center gap-3 mb-6">
             <button
               onClick={() => handleSocialLogin("instagram")}
@@ -244,7 +242,6 @@ function AuthSection() {
             </div>
           </div>
 
-          {/* Mensagem de Erro */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
@@ -395,48 +392,61 @@ function AuthSection() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-8 bg-gradient-to-br from-blue-700 via-[#0a3057] to-orange-500 max-md:rounded-t-[75px] lg:rounded-l-[300px] relative overflow-hidden">
+      <div className="flex items-center justify-center p-8 lg:p-16 bg-gradient-to-br from-blue-600 via-[#0a3057] to-orange-600 max-md:rounded-t-[120px] lg:rounded-l-[500px] relative overflow-hidden">
+        {/* Background Effects */}
         <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48 "></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-400/10 rounded-full translate-y-40 -translate-x-40 "></div>
 
-        <div className="text-center text-white max-w-md relative z-10">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            MediaFlow
-            <span className="block text-orange-300 text-2xl lg:text-3xl mt-2">
-              Seu Gerenciador de Mídia Inteligente
-            </span>
-          </h1>
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
-          <p className="text-lg lg:text-xl mb-8 leading-relaxed">
-            Gerencie, organize e compartilhe seus arquivos de mídia de forma
-            simples e eficiente. Uploads ilimitados, organização inteligente e
-            acesso em qualquer lugar.
-          </p>
+        <div className="text-center text-white max-w-4xl relative z-10">
+          {/* Main Header */}
+          <div className="mb-10">
+            <div className="inline-block mb-4">
+              <div className="text-5xl  font-black bg-gradient-to-r from-white via-orange-200 to-orange-400 bg-clip-text text-transparent leading-none">
+                MediaFlow
+              </div>
+            </div>
 
-          <div className="mb-8">
-            <Lottie />
+            <h2 className="text-xl lg:text-2xl font-bold text-orange-300 mb-8 leading-tight tracking-wide">
+              <span className="bg-gradient-to-r from-orange-300 to-orange-400 bg-clip-text text-transparent">
+                Seu Gerenciador de Mídia Inteligente
+              </span>
+            </h2>
+
+            <p className="text-xl lg:text-2xl text-blue-100 leading-relaxed max-w-2xl mx-auto font-light">
+              Transforme completamente a maneira como você gerencia arquivos de
+              mídia com uma plataforma
+              <span className="font-semibold text-orange-300">
+                {" "}
+                intuitiva, poderosa e descomplicada
+              </span>
+              .
+            </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
-              <span>Uploads ilimitados de arquivos</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
-              <span>Organização automática por pastas</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
-              <span>Compartilhamento seguro</span>
+          <div className="justify-center">
+            <div className="justify-center items-center mb-10 w-65 h-auto flex text-center">
+              <Lottie />
             </div>
           </div>
-
-          <Button
-            color="white"
-            className="mt-8 hover:bg-white/90 hover:text-orange-600 transition-all duration-300 font-semibold"
-          >
-            Conhecer Recursos
-          </Button>
+          {/* CTA Button */}
+          <div className="relative">
+            <Button
+              color="white"
+              className="relative px-12 py-4 text-lg font-bold rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 hover:bg-white hover:text-orange-600 transition-all duration-300 hover:scale-105 shadow-2xl hover:shadow-3xl group"
+            >
+              <span className="flex items-center space-x-3">
+                <span className="text-2xl">✨</span>
+                <span>Explorar Recursos Incríveis</span>
+                <span className="group-hover:translate-x-1 transition-transform duration-300">
+                  →
+                </span>
+              </span>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

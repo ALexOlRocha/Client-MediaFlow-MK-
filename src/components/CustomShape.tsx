@@ -1,7 +1,6 @@
 export default function CustomShape() {
   return (
     <div className="relative w-[500px] h-[200px]">
-      {/* Container principal com clip-path */}
       <div
         className="w-[500px] h-[300px] bg-blue-600"
         style={{
@@ -10,7 +9,6 @@ export default function CustomShape() {
         }}
       />
 
-      {/* Elemento filho */}
       <div className="absolute w-[145px] h-[65px] rounded-[18px] bg-black top-[240px] left-[352px]" />
     </div>
   );

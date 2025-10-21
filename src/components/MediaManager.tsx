@@ -724,7 +724,6 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
         </div>
       </div>
 
-      {/* Conteúdo com Melhor Layout */}
       <div
         ref={scrollContainerRef}
         className="p-6 bg-gradient-to-br from-gray-50/50 to-white/30"
