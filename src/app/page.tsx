@@ -81,14 +81,14 @@ export default function Home() {
 
             {/* Footer */}
             <div className="text-center mt-20 pb-8">
-              <div className="inline-flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-white/20">
+              <div className="inline-flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-full px-6 py-4 shadow-lg border border-white/20">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                   <span className="text-sm font-medium text-gray-600">
                     Sistema de Gerenciamento de Mídia
                   </span>
                 </div>
-                <div className="w-px h-6 bg-gray-300"></div>
+                <div className="w-px h-6 bg-gray-400"></div>
                 <div className="text-xs text-gray-500">MediaFlow MK V1</div>
               </div>
             </div>

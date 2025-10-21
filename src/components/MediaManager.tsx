@@ -3,7 +3,7 @@
 import { Folder } from "@/shared/types";
 import { LucideHome, Sparkles, Search, Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { GoFileDirectory } from "react-icons/go";
 import {
   LuFilePenLine,
@@ -91,6 +91,12 @@ interface EmptyStateProps {
   onUpload: () => void;
 }
 
+// NOVA INTERFACE PARA BUSCA GLOBAL
+interface SearchResult {
+  files: FileItem[];
+  folders: FolderWithCount[];
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 // HOOKS PERSONALIZADOS
@@ -167,6 +173,31 @@ const useFolderContent = (folderId?: string, pageSize: number = 20) => {
   });
 };
 
+// NOVO HOOK PARA BUSCA GLOBAL
+const useGlobalSearch = (searchTerm: string, enabled: boolean) => {
+  return useQuery<SearchResult>({
+    queryKey: ["globalSearch", searchTerm],
+    queryFn: async () => {
+      if (!searchTerm.trim()) {
+        return { files: [], folders: [] };
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/search?` +
+          new URLSearchParams({
+            q: searchTerm,
+            includeFiles: "true",
+            includeFolders: "true",
+          })
+      );
+      if (!response.ok) throw new Error("Erro na busca");
+      return response.json();
+    },
+    enabled: enabled && searchTerm.trim().length > 0,
+    staleTime: 1 * 60 * 1000, // 1 minuto
+  });
+};
+
 const useCreateFolder = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -193,6 +224,8 @@ const useCreateFolder = () => {
       } else {
         queryClient.invalidateQueries({ queryKey: ["folders", "root"] });
       }
+      // Invalida também a busca global
+      queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
     },
   });
 };
@@ -216,6 +249,8 @@ const useUpdateFolder = () => {
           old ? { ...old, name: variables.name } : old
       );
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      // Invalida também a busca global
+      queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
     },
   });
 };
@@ -257,6 +292,8 @@ const useDeleteFolder = () => {
       queryClient.invalidateQueries({
         queryKey: ["folders", variables.id, "content"],
       });
+      // Invalida também a busca global
+      queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
     },
     onError: (error: Error) => {
       console.error("Erro na mutação deleteFolder:", error);
@@ -278,6 +315,8 @@ const useUpdateFile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      // Invalida também a busca global
+      queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
     },
   });
 };
@@ -294,6 +333,8 @@ const useDeleteFile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      // Invalida também a busca global
+      queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
     },
   });
 };
@@ -308,7 +349,13 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   const [sortBy, setSortBy] = useState<"name" | "date" | "size">("name");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isGlobalSearch, setIsGlobalSearch] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // EFEITO PARA DETECTAR SE É BUSCA GLOBAL
+  useEffect(() => {
+    setIsGlobalSearch(searchTerm.trim().length > 0);
+  }, [searchTerm]);
 
   const handleUploadComplete = useCallback(() => {
     setIsUploadModalOpen(false);
@@ -332,7 +379,14 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
     queryClient.invalidateQueries({
       queryKey: ["folders"],
     });
-  }, [currentFolder?.id, queryClient]);
+
+    // Também invalida a busca global se estiver ativa
+    if (isGlobalSearch) {
+      queryClient.invalidateQueries({
+        queryKey: ["globalSearch"],
+      });
+    }
+  }, [currentFolder?.id, queryClient, isGlobalSearch]);
 
   // CONSULTAS
   const { data: rootFolders, isLoading: loadingRoot } = useRootFolders();
@@ -345,6 +399,13 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
     isLoading: loadingContent,
   } = useFolderContent(currentFolder?.id);
 
+  // NOVA CONSULTA PARA BUSCA GLOBAL
+  const {
+    data: searchResults,
+    isLoading: loadingSearch,
+    isError: searchError,
+  } = useGlobalSearch(searchTerm, isGlobalSearch);
+
   // MUTAÇÕES
   const createFolderMutation = useCreateFolder();
   const updateFolderMutation = useUpdateFolder();
@@ -352,22 +413,32 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   const updateFileMutation = useUpdateFile();
   const deleteFileMutation = useDeleteFile();
 
-  // DADOS CONSOLIDADOS
-  const folders = useMemo(
-    () =>
-      currentFolder
-        ? folderContent?.pages[0]?.children || []
-        : rootFolders || [],
-    [currentFolder, folderContent, rootFolders]
-  );
+  // DADOS CONSOLIDADOS - ATUALIZADO PARA BUSCA GLOBAL
+  const folders = useMemo(() => {
+    if (isGlobalSearch && searchResults) {
+      return searchResults.folders || [];
+    }
+    return currentFolder
+      ? folderContent?.pages[0]?.children || []
+      : rootFolders || [];
+  }, [
+    currentFolder,
+    folderContent,
+    rootFolders,
+    isGlobalSearch,
+    searchResults,
+  ]);
 
-  const files = useMemo(
-    () =>
+  const files = useMemo(() => {
+    if (isGlobalSearch && searchResults) {
+      return searchResults.files || [];
+    }
+    return (
       folderContent?.pages.flatMap(
         (page: FolderContentResponse) => page.files || []
-      ) || [],
-    [folderContent]
-  );
+      ) || []
+    );
+  }, [folderContent, isGlobalSearch, searchResults]);
 
   const pagination = folderContent?.pages[0]?.pagination || {
     totalFiles: 0,
@@ -377,18 +448,18 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
     totalPages: 0,
   };
 
-  // FILTRAGEM E ORDENAÇÃO
+  // FILTRAGEM E ORDENAÇÃO - SIMPLIFICADA PARA BUSCA GLOBAL
   const filteredAndSortedItems = useMemo(() => {
     const allItems = [
       ...folders.map((folder) => ({ ...folder, type: "folder" as const })),
       ...files.map((file) => ({ ...file, type: "file" as const })),
     ];
 
-    const filtered = allItems.filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Para busca global, já recebemos os resultados filtrados da API
+    // Apenas aplicamos a ordenação
+    const sortedItems = [...allItems];
 
-    filtered.sort((a, b) => {
+    sortedItems.sort((a, b) => {
       switch (sortBy) {
         case "name":
           return a.name.localeCompare(b.name, "pt-BR");
@@ -406,12 +477,14 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
       }
     });
 
-    return filtered;
-  }, [folders, files, searchTerm, sortBy]);
+    return sortedItems;
+  }, [folders, files, sortBy]);
 
-  // NAVEGAÇÃO
+  // NAVEGAÇÃO - ATUALIZADA PARA LIDAR COM BUSCA
   const navigateToFolder = useCallback(
     (folder: Folder) => {
+      setSearchTerm(""); // Limpa a busca ao navegar para uma pasta
+      setIsGlobalSearch(false);
       setCurrentFolder(folder);
       setBreadcrumbs((prev) => {
         const alreadyExists = prev.some((f: Folder) => f.id === folder.id);
@@ -435,6 +508,8 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   );
 
   const handleBackToRoot = useCallback(() => {
+    setSearchTerm(""); // Limpa a busca ao voltar para a raiz
+    setIsGlobalSearch(false);
     setCurrentFolder(null);
     setBreadcrumbs([]);
     if (onFolderChange) {
@@ -443,6 +518,8 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   }, [onFolderChange]);
 
   const navigateUp = useCallback(() => {
+    setSearchTerm(""); // Limpa a busca ao navegar para cima
+    setIsGlobalSearch(false);
     if (breadcrumbs.length > 1) {
       const newBreadcrumbs = breadcrumbs.slice(0, -1);
       const parentFolder = newBreadcrumbs[newBreadcrumbs.length - 1];
@@ -547,9 +624,11 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
     }
   };
 
-  // INFINITE SCROLL
+  // INFINITE SCROLL - DESABILITADO DURANTE BUSCA
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
+      if (isGlobalSearch) return; // Não faz infinite scroll durante busca
+
       const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
       if (
         scrollTop + clientHeight >= scrollHeight - 400 &&
@@ -559,19 +638,20 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
         fetchNextPage();
       }
     },
-    [hasNextPage, isFetchingNextPage, fetchNextPage]
+    [hasNextPage, isFetchingNextPage, fetchNextPage, isGlobalSearch]
   );
 
-  const isLoading = loadingRoot || loadingContent;
+  const isLoading = loadingRoot || loadingContent || loadingSearch;
   const error =
     createFolderMutation.error ||
     updateFolderMutation.error ||
     deleteFolderMutation.error ||
     updateFileMutation.error ||
-    deleteFileMutation.error;
+    deleteFileMutation.error ||
+    searchError;
 
   // LOADING STATE
-  if (isLoading && !isFetchingNextPage) {
+  if (isLoading && !isFetchingNextPage && !isGlobalSearch) {
     return (
       <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8">
         <div className="flex flex-col items-center justify-center h-48">
@@ -607,7 +687,9 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
               </h2>
               <p className="text-blue-100 mt-1 text-sm flex items-center">
                 <Sparkles className="w-4 h-4 mr-1" />
-                {currentFolder
+                {isGlobalSearch
+                  ? `Buscando: "${searchTerm}" • ${filteredAndSortedItems.length} resultados`
+                  : currentFolder
                   ? `Em "${currentFolder.name}" • ${pagination.totalFiles} arquivos, ${pagination.totalChildren} pastas`
                   : "Navegue pelas suas pastas"}
               </p>
@@ -626,7 +708,11 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
               <button
                 onClick={handleAddFolder}
-                disabled={createFolderMutation.isPending || isCreatingFolder}
+                disabled={
+                  createFolderMutation.isPending ||
+                  isCreatingFolder ||
+                  isGlobalSearch
+                }
                 className="flex items-center cursor-pointer rounded-md md:rounded-full space-x-2 px-2  md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 disabled:opacity-50 hover:scale-105"
               >
                 {createFolderMutation.isPending || isCreatingFolder ? (
@@ -641,7 +727,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 </span>
               </button>
 
-              {breadcrumbs.length > 0 && (
+              {breadcrumbs.length > 0 && !isGlobalSearch && (
                 <button
                   onClick={navigateUp}
                   className="flex items-center cursor-pointer space-x-2 max-md:px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white md:rounded-full rounded-md hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105"
@@ -663,20 +749,33 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             <span className="font-medium">Início</span>
           </button>
 
-          {breadcrumbs.map((folder: Folder) => (
-            <div key={folder.id} className="flex items-center py-2">
+          {!isGlobalSearch &&
+            breadcrumbs.map((folder: Folder) => (
+              <div key={folder.id} className="flex items-center py-2">
+                <span className="mx-2 text-white/50">/</span>
+                <button
+                  onClick={() => navigateToFolder(folder)}
+                  className="flex cursor-pointer items-center border-white/50 space-x-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-all duration-300 shadow-sm border max-w-32 "
+                >
+                  <GoFileDirectory className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate font-medium group-hover:whitespace-normal group-hover:break-words">
+                    {folder.name}
+                  </span>
+                </button>
+              </div>
+            ))}
+
+          {isGlobalSearch && (
+            <div className="flex items-center py-2">
               <span className="mx-2 text-white/50">/</span>
-              <button
-                onClick={() => navigateToFolder(folder)}
-                className="flex cursor-pointer items-center border-white/50 space-x-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-all duration-300 shadow-sm border max-w-32 "
-              >
-                <GoFileDirectory className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate font-medium group-hover:whitespace-normal group-hover:break-words">
-                  {folder.name}
+              <div className="flex items-center space-x-2 px-3 py-2 bg-white/30 backdrop-blur-sm rounded-lg text-white border border-white/50 max-w-32">
+                <Search className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate font-medium">
+                  Busca: "{searchTerm}"
                 </span>
-              </button>
+              </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -685,13 +784,13 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center space-x-4 flex-1 w-full md:max-w-lg">
             <div className="relative flex-1">
-              <Search className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
               <input
                 type="text"
-                placeholder="Buscar arquivos ou pastas..."
+                placeholder="Buscar em todos os arquivos e pastas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 outline-none  py-2.5 bg-white/80 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-300 placeholder-gray-500"
+                className="w-full pl-10 pr-4 outline-none py-2.5 bg-white/80 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm transition-all duration-300 placeholder-gray-500"
               />
               {searchTerm && (
                 <button
@@ -710,7 +809,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
               onChange={(e) =>
                 setSortBy(e.target.value as "name" | "date" | "size")
               }
-              className="bg-white/80 border cursor-pointer outline-none  border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+              className="bg-white/80 border cursor-pointer outline-none border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
             >
               <option value="name">Ordenar por Nome</option>
               <option value="date">Ordenar por Data</option>
@@ -766,6 +865,24 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
           </div>
         )}
 
+        {/* INDICADOR DE BUSCA GLOBAL */}
+        {isGlobalSearch && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl backdrop-blur-sm">
+            <div className="flex items-center space-x-2 text-blue-700">
+              <Search className="w-4 h-4" />
+              <span className="font-medium">
+                Buscando em todas as pastas: "{searchTerm}"
+              </span>
+              <button
+                onClick={() => setSearchTerm("")}
+                className="ml-auto text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Limpar busca
+              </button>
+            </div>
+          </div>
+        )}
+
         {filteredAndSortedItems.length > 0 ? (
           <div
             className={`
@@ -812,7 +929,8 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 Nenhum resultado encontrado
               </h3>
               <p className="text-gray-500">
-                Não encontramos resultados para &quot;{searchTerm}&quot;
+                Não encontramos resultados para &quot;{searchTerm}&quot; em
+                todas as pastas
               </p>
               <button
                 onClick={() => setSearchTerm("")}
@@ -830,23 +948,47 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
           />
         )}
 
-        {isFetchingNextPage && (
+        {/* MOSTRAR LOADING DURANTE BUSCA */}
+        {loadingSearch && (
+          <div className="col-span-full flex justify-center py-8">
+            <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border border-gray-200/50">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="text-gray-600 text-sm font-medium">
+                Buscando em todas as pastas...
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!hasNextPage &&
+          filteredAndSortedItems.length > 0 &&
+          !isGlobalSearch && (
+            <div className="col-span-full text-center py-8">
+              <div className="text-gray-400 text-sm">
+                {filteredAndSortedItems.length === 1
+                  ? "1 item encontrado"
+                  : `${filteredAndSortedItems.length} itens encontrados`}
+              </div>
+            </div>
+          )}
+
+        {isGlobalSearch && filteredAndSortedItems.length > 0 && (
+          <div className="col-span-full text-center py-8">
+            <div className="text-gray-400 text-sm">
+              {filteredAndSortedItems.length === 1
+                ? "1 resultado encontrado"
+                : `${filteredAndSortedItems.length} resultados encontrados`}
+            </div>
+          </div>
+        )}
+
+        {isFetchingNextPage && !isGlobalSearch && (
           <div className="col-span-full flex justify-center py-8">
             <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border border-gray-200/50">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
               <span className="text-gray-600 text-sm font-medium">
                 Carregando mais conteúdo...
               </span>
-            </div>
-          </div>
-        )}
-
-        {!hasNextPage && filteredAndSortedItems.length > 0 && (
-          <div className="col-span-full text-center py-8">
-            <div className="text-gray-400 text-sm">
-              {filteredAndSortedItems.length === 1
-                ? "1 item encontrado"
-                : `${filteredAndSortedItems.length} itens encontrados`}
             </div>
           </div>
         )}

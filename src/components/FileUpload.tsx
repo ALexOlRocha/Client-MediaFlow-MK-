@@ -150,7 +150,7 @@ export default function FolderUpload({
 
       // Pequeno delay para mostrar 100% completo
       setTimeout(() => {
-        handleUploadSuccess(); // CORRIGIDO: usa a função comum
+        handleUploadSuccess();
         event.target.value = "";
         setUploadProgress(0);
       }, 1000);
@@ -164,7 +164,7 @@ export default function FolderUpload({
       setIsUploading(false);
     }
   };
-
+  // Função para upload de múltiplos arquivos
   const handleMultipleFilesUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -210,7 +210,7 @@ export default function FolderUpload({
         );
       });
 
-      // CORREÇÃO: Usar folderId em vez de parentFolderId
+      // Adicionar pasta destino, se houver
       const targetFolderId = parentFolderId || currentFolder?.id;
       if (targetFolderId) {
         formData.append("folderId", targetFolderId);
@@ -234,12 +234,10 @@ export default function FolderUpload({
           return prev + 5;
         });
       }, 300);
-
-      // CORREÇÃO: Tentar ambas as rotas sequencialmente
+      // Tentar upload com rota principal e alternativa
       let response;
       let usedAltRoute = false;
-
-      // Primeiro tenta a rota principal
+      // Tentar rota principal primeiro
       try {
         response = await fetch(`${API_BASE_URL}/api/files/upload-multiple`, {
           method: "POST",
@@ -298,7 +296,7 @@ export default function FolderUpload({
       }
 
       setTimeout(() => {
-        handleUploadSuccess(); // CORRIGIDO: usa a função comum
+        handleUploadSuccess();
         event.target.value = "";
         setUploadProgress(0);
       }, 1000);
