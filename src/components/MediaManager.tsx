@@ -572,7 +572,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
   return (
     <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-700 via-[#0a3057] to-orange-500 border-b border-white/20 p-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-700 via-[#0a3057] to-orange-500 border-b border-white/20 px-4 py-6 md:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative z-10">
@@ -597,13 +597,13 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row ">
+            <div className="flex md:gap-2 gap-3 ">
               <button
                 onClick={() => setIsUploadModalOpen(true)}
-                className="flex cursor-pointer rounded-2xl md:rounded-full items-center space-x-2 px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105 group"
+                className="flex cursor-pointer rounded-md md:rounded-full items-center space-x-2 px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105 group"
               >
-                <Upload className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <Upload className="md:w-5 md:h-5 w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">Upload</span>
               </button>
 
@@ -613,9 +613,9 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 className="flex items-center cursor-pointer rounded-md md:rounded-full space-x-2 px-2  md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 disabled:opacity-50 hover:scale-105"
               >
                 {createFolderMutation.isPending || isCreatingFolder ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="md:w-5 md:h-5 w-4 h-4 animate-spin" />
                 ) : (
-                  <LuFolderPlus className="w-5 h-5" />
+                  <LuFolderPlus className="md:w-5 md:h-5 w-4 h-4" />
                 )}
                 <span className="font-medium">
                   {createFolderMutation.isPending || isCreatingFolder
@@ -629,7 +629,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                   onClick={navigateUp}
                   className="flex items-center cursor-pointer space-x-2 max-md:px-2 md:px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white md:rounded-full rounded-md hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/50 hover:scale-105"
                 >
-                  <MdDriveFileMoveRtl className="w-5 h-5" />
+                  <MdDriveFileMoveRtl className="md:w-5 md:h-5 w-4 h-4" />
                   <span className="font-medium">Voltar</span>
                 </button>
               )}
@@ -647,7 +647,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
           </button>
 
           {breadcrumbs.map((folder: Folder) => (
-            <div key={folder.id} className="flex items-center">
+            <div key={folder.id} className="flex items-center py-2">
               <span className="mx-2 text-white/50">/</span>
               <button
                 onClick={() => navigateToFolder(folder)}
@@ -666,7 +666,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
       {/* Barra de Pesquisa e Filtros */}
       <div className="border-b border-gray-200/50 bg-white/50 backdrop-blur-sm p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center space-x-4 flex-1 max-w-lg">
+          <div className="flex items-center space-x-4 flex-1 w-full md:max-w-lg">
             <div className="relative flex-1">
               <Search className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
               <input
@@ -920,7 +920,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
         viewMode === "list" ? "flex space-x-1" : ""
       }`}
     >
-      <div className="flex space-x-2 bg-white/95 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-200/50">
+      <div className="flex space-x-2 bg-gray-100/95 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-500/50">
         <button
           onClick={(e) => {
             e.stopPropagation();

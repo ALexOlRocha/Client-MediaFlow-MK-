@@ -1,4 +1,3 @@
-// app/page.tsx - VERSÃO SUPER ATUALIZADA
 "use client";
 
 import MediaManager from "@/components/MediaManager";

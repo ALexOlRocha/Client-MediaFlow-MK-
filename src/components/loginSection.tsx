@@ -23,7 +23,7 @@ function LoginSection() {
           <form onSubmit={handleSubmit} className="space-y-4 ">
             <div className="flex gap-6">
               <Image
-                src="/MK -Logo.png"
+                src="/MediaFlow2.png"
                 alt="MK logo"
                 width={100}
                 height={100}
