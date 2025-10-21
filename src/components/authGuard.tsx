@@ -4,9 +4,25 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/Button";
 import { LuLogOut } from "react-icons/lu";
 
+// Interface para o usuário
+interface User {
+  email: string;
+  name?: string;
+  document?: string;
+  createdAt?: string;
+}
+
+// Interface para o hook useAuth
+interface UseAuthReturn {
+  user: User | null;
+  isLoading: boolean;
+  login: (userData: User, token: string) => void;
+  logout: () => void;
+}
+
 // Hook para verificar autenticação
-export function useAuth() {
-  const [user, setUser] = useState<any>(null);
+export function useAuth(): UseAuthReturn {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +31,13 @@ export function useAuth() {
       const token = localStorage.getItem("mediaflow_token");
 
       if (userData && token) {
-        setUser(JSON.parse(userData));
+        try {
+          const parsedUser: User = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error("Erro ao fazer parse do usuário:", error);
+          setUser(null);
+        }
       }
       setIsLoading(false);
     };
@@ -23,7 +45,7 @@ export function useAuth() {
     checkAuth();
   }, []);
 
-  const login = (userData: any, token: string) => {
+  const login = (userData: User, token: string) => {
     localStorage.setItem("mediaflow_user", JSON.stringify(userData));
     localStorage.setItem("mediaflow_token", token);
     setUser(userData);
@@ -38,7 +60,12 @@ export function useAuth() {
   return { user, isLoading, login, logout };
 }
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+// Props para AuthGuard
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+export function AuthGuard({ children }: AuthGuardProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
@@ -50,8 +77,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Carregando...</p>
+        </div>
       </div>
     );
   }
@@ -76,10 +106,10 @@ export function LogoutButton() {
     <Button
       color="orange"
       onClick={handleLogout}
-      className="px-6 py-3 bg--600 flex text-white rounded-full items-center gap-2 transition-colors"
+      className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
     >
-      <span> Sair</span>
-      <LuLogOut className="w-4 h-4 text-white" />
+      <span className="font-semibold">Sair</span>
+      <LuLogOut className="w-4 h-4" />
     </Button>
   );
 }

@@ -91,12 +91,6 @@ interface EmptyStateProps {
   onUpload: () => void;
 }
 
-// TIPAGEM PARA O INFINITE QUERY
-interface InfiniteQueryData {
-  pages: FolderContentResponse[];
-  pageParams: number[];
-}
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 // HOOKS PERSONALIZADOS
@@ -191,7 +185,7 @@ const useCreateFolder = () => {
       if (!response.ok) throw new Error("Erro ao criar pasta");
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       if (variables.parentId) {
         queryClient.invalidateQueries({
           queryKey: ["folders", variables.parentId, "content"],
@@ -215,7 +209,7 @@ const useUpdateFolder = () => {
       if (!response.ok) throw new Error("Erro ao atualizar pasta");
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.setQueryData(
         ["folders", variables.id, "light"],
         (old: FolderWithCount | null) =>
@@ -257,7 +251,7 @@ const useDeleteFolder = () => {
         return { success: true };
       }
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.removeQueries({ queryKey: ["folders", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["folders"] });
       queryClient.invalidateQueries({
@@ -282,7 +276,7 @@ const useUpdateFile = () => {
       if (!response.ok) throw new Error("Erro ao atualizar arquivo");
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
@@ -304,7 +298,7 @@ const useDeleteFile = () => {
   });
 };
 
-// 🔥 COMPONENTE PRINCIPAL MELHORADO
+
 export default function MediaManager({ onFolderChange }: MediaManagerProps) {
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Folder[]>([]);
@@ -318,7 +312,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
   // CONSULTAS
   const { data: rootFolders, isLoading: loadingRoot } = useRootFolders();
-  const { data: currentFolderData } = useFolder(currentFolder?.id);
+  const { data: _currentFolderData } = useFolder(currentFolder?.id);
   const {
     data: folderContent,
     fetchNextPage,
@@ -366,7 +360,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
       ...files.map((file) => ({ ...file, type: "file" as const })),
     ];
 
-    let filtered = allItems.filter((item) =>
+    const filtered = allItems.filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -519,12 +513,15 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
     }
   };
 
-  const handleItemClick = (type: "folder" | "file", item: any) => {
+  const handleItemClick = (
+    type: "folder" | "file",
+    item: FolderWithCount | FileItem
+  ) => {
     setSelectedItem(item.id);
     setTimeout(() => setSelectedItem(null), 300);
 
     if (type === "folder") {
-      navigateToFolder(item);
+      navigateToFolder(item as Folder);
     } else {
       window.open(`${API_BASE_URL}/api/files/${item.id}`, "_blank");
     }
@@ -690,7 +687,9 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
           <div className="flex items-center space-x-4">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) =>
+                setSortBy(e.target.value as "name" | "date" | "size")
+              }
               className="bg-white/80 border cursor-pointer outline-none  border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
             >
               <option value="name">Ordenar por Nome</option>
@@ -793,7 +792,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 Nenhum resultado encontrado
               </h3>
               <p className="text-gray-500">
-                Não encontramos resultados para "{searchTerm}"
+                Não encontramos resultados para &quot;{searchTerm}&quot;
               </p>
               <button
                 onClick={() => setSearchTerm("")}

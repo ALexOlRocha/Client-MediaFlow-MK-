@@ -1,8 +1,7 @@
 "use client";
 import Image from "next/image";
-
 import { Button } from "./ui/Button";
-import { Input } from "./ui/Input";
+
 import {
   FaFacebookF,
   FaInstagram,
@@ -13,18 +12,29 @@ import { MdOutlineEmail } from "react-icons/md";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lottie } from "./lottlie";
+import Input from "./ui/Input";
 
-// Interface para o usuário
+// Interfaces para tipagem
 interface User {
   email: string;
   name?: string;
   document?: string;
+  createdAt?: string;
+  password?: string;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  document: string;
+  password: string;
+  confirmPassword: string;
 }
 
 function AuthSection() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     document: "",
@@ -51,25 +61,23 @@ function AuthSection() {
 
     try {
       if (isLogin) {
-        // Lógica de login
         await handleLogin();
       } else {
-        // Lógica de cadastro
         await handleRegister();
       }
-    } catch (err) {
+    } catch {
       setError("Erro ao processar sua solicitação");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<void> => {
     const { email, password } = formData;
 
     // Validação da conta de demonstração
     if (email === "demo@mediaflow.com" && password === "demo123") {
-      const demoUser = {
+      const demoUser: User = {
         email: "demo@mediaflow.com",
         name: "Usuário Demonstração",
       };
@@ -81,12 +89,15 @@ function AuthSection() {
     }
 
     // Buscar usuários cadastrados no localStorage
-    const users = JSON.parse(localStorage.getItem("mediaflow_users") || "[]");
+    const users: User[] = JSON.parse(
+      localStorage.getItem("mediaflow_users") || "[]"
+    );
     const user = users.find(
-      (u: any) => u.email === email && u.password === password
+      (u: User) => u.email === email && u.password === password
     );
 
     if (user) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...userWithoutPassword } = user;
       localStorage.setItem(
         "mediaflow_user",
@@ -99,7 +110,7 @@ function AuthSection() {
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (): Promise<void> => {
     const { name, email, document, password, confirmPassword } = formData;
 
     // Validações
@@ -119,8 +130,10 @@ function AuthSection() {
     }
 
     // Verificar se email já existe
-    const users = JSON.parse(localStorage.getItem("mediaflow_users") || "[]");
-    const existingUser = users.find((u: any) => u.email === email);
+    const users: User[] = JSON.parse(
+      localStorage.getItem("mediaflow_users") || "[]"
+    );
+    const existingUser = users.find((u: User) => u.email === email);
 
     if (existingUser) {
       setError("Este email já está cadastrado");
@@ -128,11 +141,11 @@ function AuthSection() {
     }
 
     // Criar novo usuário
-    const newUser = {
+    const newUser: User = {
       name,
       email,
       document,
-      password, // Em produção, isso deve ser criptografado
+      password,
       createdAt: new Date().toISOString(),
     };
 
@@ -141,6 +154,7 @@ function AuthSection() {
     localStorage.setItem("mediaflow_users", JSON.stringify(users));
 
     // Logar automaticamente
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = newUser;
     localStorage.setItem("mediaflow_user", JSON.stringify(userWithoutPassword));
     localStorage.setItem("mediaflow_token", `user_token_${Date.now()}`);
@@ -149,26 +163,37 @@ function AuthSection() {
     router.push("/");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Limpar erro quando usuário começar a digitar
     if (error) setError("");
   };
 
-  const handleSocialLogin = (platform: string) => {
+  const handleSocialLogin = (platform: string): void => {
     setError(`Login com ${platform} - Em desenvolvimento`);
   };
 
-  const handleDemoLogin = () => {
+  const handleDemoLogin = (): void => {
     setFormData({
       name: "",
       email: "demo@mediaflow.com",
       document: "",
       password: "demo123",
+      confirmPassword: "",
+    });
+  };
+
+  const toggleAuthMode = (): void => {
+    setIsLogin(!isLogin);
+    setError("");
+    setFormData({
+      name: "",
+      email: "",
+      document: "",
+      password: "",
       confirmPassword: "",
     });
   };
@@ -359,17 +384,7 @@ function AuthSection() {
             <p className="text-gray-600">
               {isLogin ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
               <button
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setError("");
-                  setFormData({
-                    name: "",
-                    email: "",
-                    document: "",
-                    password: "",
-                    confirmPassword: "",
-                  });
-                }}
+                onClick={toggleAuthMode}
                 className="text-blue-600 cursor-pointer hover:text-blue-500 font-semibold transition-colors"
               >
                 {isLogin ? "Cadastre-se" : "Fazer login"}

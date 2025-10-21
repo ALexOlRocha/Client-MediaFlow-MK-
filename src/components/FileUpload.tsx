@@ -1,19 +1,30 @@
-// components/FolderUpload.tsx - LIMITES ATUALIZADOS
 "use client";
 
 import { useState } from "react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+// Interfaces para tipagem
+interface Folder {
+  id: string;
+  name: string;
+  // Adicione outras propriedades conforme necessário
+}
+
 interface FolderUploadProps {
   parentFolderId?: string;
   onUploadComplete: () => void;
-  currentFolder?: any;
+  currentFolder?: Folder | null;
 }
 
-// 🔥 NOVOS LIMITES
+interface UploadErrorResponse {
+  error?: string;
+  code?: string;
+}
+
 const MAX_ZIP_SIZE = 1024 * 1024 * 1024; // 1GB
 const MAX_TOTAL_SIZE = 1024 * 1024 * 1024; // 1GB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB por arquivo
 
 export default function FolderUpload({
   parentFolderId,
@@ -25,7 +36,7 @@ export default function FolderUpload({
   const [uploadType, setUploadType] = useState<"zip" | "structure">("zip");
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -101,7 +112,7 @@ export default function FolderUpload({
       if (!response.ok) {
         let errorMessage = `Upload falhou: ${response.status}`;
         try {
-          const errorData = await response.json();
+          const errorData: UploadErrorResponse = await response.json();
           errorMessage = errorData.error || errorMessage;
 
           // Tratamento específico para erro de tamanho
@@ -110,7 +121,7 @@ export default function FolderUpload({
               MAX_ZIP_SIZE
             )}`;
           }
-        } catch (e) {
+        } catch {
           const text = await response.text();
           errorMessage = text || errorMessage;
         }
@@ -165,11 +176,10 @@ export default function FolderUpload({
 
       // Verificar arquivos individuais
       for (const file of Array.from(files)) {
-        if (file.size > 100 * 1024 * 1024) {
-          // 100MB por arquivo
+        if (file.size > MAX_FILE_SIZE) {
           throw new Error(
             `Arquivo "${file.name}" muito grande. Máximo: ${formatFileSize(
-              100 * 1024 * 1024
+              MAX_FILE_SIZE
             )} por arquivo`
           );
         }
@@ -221,9 +231,9 @@ export default function FolderUpload({
       if (!response.ok) {
         let errorMessage = `Upload falhou: ${response.status}`;
         try {
-          const errorData = await response.json();
+          const errorData: UploadErrorResponse = await response.json();
           errorMessage = errorData.error || errorMessage;
-        } catch (e) {
+        } catch {
           const text = await response.text();
           errorMessage = text || errorMessage;
         }
@@ -249,6 +259,14 @@ export default function FolderUpload({
     }
   };
 
+  const handleCloseError = (): void => {
+    setUploadError(null);
+  };
+
+  const handleUploadTypeChange = (type: "zip" | "structure"): void => {
+    setUploadType(type);
+  };
+
   return (
     <div className="p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
       <div className="mb-3">
@@ -258,17 +276,17 @@ export default function FolderUpload({
 
         <div className="flex space-x-2 mb-3">
           <button
-            onClick={() => setUploadType("zip")}
+            onClick={() => handleUploadTypeChange("zip")}
             className={`px-3 py-1 rounded-full cursor-pointer text-sm ${
               uploadType === "zip"
-                ? "bg-blue-600  text-white"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}
           >
             Via ZIP
           </button>
           <button
-            onClick={() => setUploadType("structure")}
+            onClick={() => handleUploadTypeChange("structure")}
             className={`px-3 py-1 rounded-full cursor-pointer text-sm ${
               uploadType === "structure"
                 ? "bg-green-600 text-white"
@@ -349,7 +367,7 @@ export default function FolderUpload({
           <div className="font-semibold">❌ Erro no Upload</div>
           <div className="mt-1">{uploadError}</div>
           <button
-            onClick={() => setUploadError(null)}
+            onClick={handleCloseError}
             className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
           >
             Fechar
