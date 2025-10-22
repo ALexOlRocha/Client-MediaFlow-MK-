@@ -781,7 +781,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
             </button>
 
             {!isGlobalSearch &&
-              breadcrumbs.map((folder: Folder, index) => (
+              breadcrumbs.map((folder: Folder) => (
                 <div key={folder.id} className="flex items-center">
                   <ChevronRight className="w-4 h-4 text-white/50 mx-2" />
                   <button
@@ -800,7 +800,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 <div className="flex items-center space-x-2 px-3 py-2 bg-white/30 backdrop-blur-sm rounded-lg text-white border border-white/50">
                   <Search className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate font-medium">
-                    Busca: "{searchTerm}"
+                    Busca: &quot;{searchTerm}&quot;
                   </span>
                 </div>
               </div>
@@ -904,7 +904,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
                 <div className="flex items-center space-x-2 text-blue-700">
                   <Search className="w-4 h-4" />
                   <span className="font-medium">
-                    Buscando em todas as pastas: "{searchTerm}"
+                    Buscando em todas as pastas: &quot;{searchTerm}&quot;
                   </span>
                 </div>
                 <button
