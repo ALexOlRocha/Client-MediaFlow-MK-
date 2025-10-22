@@ -9,7 +9,6 @@ import {
   X,
   Loader2,
   ChevronRight,
-  MoreVertical,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
@@ -21,9 +20,8 @@ import {
   LuList,
   LuGrid2X2,
   LuDownload,
-  LuShare2,
 } from "react-icons/lu";
-import { MdDriveFileMoveRtl } from "react-icons/md";
+
 import { RiDeleteBin6Line } from "react-icons/ri";
 import FileUpload from "./FileUpload";
 import {
@@ -33,79 +31,16 @@ import {
   useInfiniteQuery,
   InfiniteData,
 } from "@tanstack/react-query";
+import FolderWithCount from "@/models/folderWithCount";
+import FolderContentResponse from "@/models/folderContentResponseModels";
+import SearchResult from "@/models/searchResultModels";
+import MediaManagerProps from "@/models/mediaManagerPropsModels";
 
-// INTERFACES TIPADAS
-interface MediaManagerProps {
-  onFolderChange?: (folder: Folder | null) => void;
-}
-
-interface UploadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUploadComplete: () => void;
-  currentFolder: Folder | null;
-}
-
-interface FileItem {
-  id: string;
-  name: string;
-  mimeType: string;
-  size: number;
-  path: string;
-  createdAt: string;
-}
-
-interface FolderWithCount extends Folder {
-  _count?: {
-    children: number;
-    files: number;
-  };
-}
-
-interface PaginationInfo {
-  page: number;
-  pageSize: number;
-  totalFiles: number;
-  totalChildren: number;
-  totalPages: number;
-}
-
-interface FolderContentResponse {
-  files: FileItem[];
-  children: FolderWithCount[];
-  pagination: PaginationInfo;
-}
-
-interface FolderItemProps {
-  folder: FolderWithCount;
-  selectedItem: string | null;
-  onEdit: () => void;
-  onDelete: () => void;
-  onClick: () => void;
-  viewMode: "grid" | "list";
-  isPending?: boolean;
-}
-
-interface FileItemProps {
-  file: FileItem;
-  selectedItem: string | null;
-  onEdit: () => void;
-  onDelete: () => void;
-  onClick: () => void;
-  viewMode: "grid" | "list";
-  isPending?: boolean;
-}
-
-interface EmptyStateProps {
-  currentFolder: Folder | null;
-  onAddFolder: () => void;
-  onUpload: () => void;
-}
-
-interface SearchResult {
-  files: FileItem[];
-  folders: FolderWithCount[];
-}
+import FolderItemProps from "@/models/folderItemPropsModels";
+import FileItemProps from "@/models/fileItemPropsModels";
+import EmptyStateProps from "@/models/emptyStatePropsModels";
+import UploadModalProps from "@/models/uploadModalPropsModels";
+import FileItemModels from "@/models/fileItemModels";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -474,7 +409,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
           if (a.type === "folder" && b.type === "folder") return 0;
           if (a.type === "folder") return -1;
           if (b.type === "folder") return 1;
-          return (b as FileItem).size - (a as FileItem).size;
+          return (b as FileItemModels).size - (a as FileItemModels).size;
         default:
           return 0;
       }
@@ -615,7 +550,7 @@ export default function MediaManager({ onFolderChange }: MediaManagerProps) {
 
   const handleItemClick = (
     type: "folder" | "file",
-    item: FolderWithCount | FileItem
+    item: FolderWithCount | FileItemModels
   ) => {
     setSelectedItem(item.id);
     setTimeout(() => setSelectedItem(null), 300);
