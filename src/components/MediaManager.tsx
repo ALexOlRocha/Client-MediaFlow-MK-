@@ -194,7 +194,7 @@ const useGlobalSearch = (searchTerm: string, enabled: boolean) => {
       return response.json();
     },
     enabled: enabled && searchTerm.trim().length > 0,
-    staleTime: 1 * 60 * 1000, // 1 minuto
+    staleTime: 1 * 60 * 1000,
   });
 };
 
@@ -1228,12 +1228,12 @@ const FileItem: React.FC<FileItemProps> = ({
         `}
         >
           <Image
-            src={`${API_BASE_URL}/api/files/${file.id}`}
+            src={`${API_BASE_URL}/api/images/${file.id}`}
             alt={file.name}
-            width={viewMode === "grid" ? 200 : 64}
-            height={viewMode === "grid" ? 200 : 64}
-            className={`object-cover transition-transform duration-300 group-hover:scale-110 ${
-              viewMode === "grid" ? "w-full h-full" : "w-16 h-16"
+            width={viewMode === "grid" ? 500 : 100}
+            height={viewMode === "grid" ? 500 : 100}
+            className={`object-cover p-4 transition-transform duration-300 group-hover:scale-110 ${
+              viewMode === "grid" ? "w-full h-auto" : "w-16 h-16"
             }`}
             onError={(e) => {
               console.error("Erro ao carregar imagem:", file.name);
